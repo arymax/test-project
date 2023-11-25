@@ -20,7 +20,7 @@ export class Restaurant {
   @Column()
   address: string;
 
-  @ManyToOne(() => User, user => user.restaurants)
+  @ManyToOne(() => require('../../user/entities/user.entity').User, user => user.restaurants)
   owner: User;
 
   @OneToMany(() => RestaurantBusinessTime, businessTime => businessTime.restaurant)

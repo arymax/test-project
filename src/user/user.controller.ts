@@ -1,34 +1,69 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete ,BadRequestException} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse } from '@nestjs/swagger';
+import { UserDto } from './dto/user-dto';
+import { createUserDto } from './dto/create-user.dto';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+  @Post('login')
+  @ApiOkResponse({
+    description: 'Login successful',
+    type: UserDto,
+  })
+  async login(@Body() body: { email: string; password: string }) {
+    const user = await this.userService.findOneByEmail(body.email);
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
+    }
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+    if (!bcrypt.compareSync(body.password, user.password)) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
+
+    return { token };
   }
+  @Post('register')
+  @ApiCreatedResponse({
+    description: 'User registration successful',
+    type: UserDto,
+  })
+  async register(@Body() createUserDto: createUserDto) {
+    const existingUser = await this.userService.findOneByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new BadRequestException('Email already in use');
+    }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
+    const user = await this.userService.create(createUserDto);
+
+    return { success: true, userId: user.id };
   }
+  @Post('vendor-register')
+  @ApiCreatedResponse({
+    description: 'Vendor registration successful',
+    type: UserDto,
+  })
+  async vendorRegister(@Body() createUserDto: createUserDto) {
+    const existingUser = await this.userService.findOneByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new BadRequestException('Email already in use');
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
+    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
+    const user = await this.userService.create(createUserDto);
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
+    // 创建默认餐厅、餐点分类和餐点数据
+    // 假设有相应的服务和方法来处理这些
+    // 例如: this.restaurantService.createDefaultRestaurant(user.id);
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return { success: true, userId: user.id };
   }
 }
