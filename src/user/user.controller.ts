@@ -4,9 +4,17 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { ApiCreatedResponse } from '@nestjs/swagger';
+import {ApiProperty } from '@nestjs/swagger';
 import { UserDto } from './dto/user-dto';
 import { createUserDto } from './dto/create-user.dto';
 @Controller('user')
+class LoginRequesttDto{
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty()
+  password: string;
+}
 export class UserController {
   constructor(private readonly userService: UserService) {}
   @Post('login')
@@ -14,7 +22,8 @@ export class UserController {
     description: 'Login successful',
     type: UserDto,
   })
-  async login(@Body() body: { email: string; password: string }) {
+
+  async login(@Body() body: LoginRequesttDto) {
     const user = await this.userService.findOneByEmail(body.email);
     if (!user) {
       throw new BadRequestException('Invalid credentials');
