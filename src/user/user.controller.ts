@@ -7,7 +7,8 @@ import { ApiCreatedResponse } from '@nestjs/swagger';
 import {ApiProperty } from '@nestjs/swagger';
 import { UserDto } from './dto/user-dto';
 import { createUserDto } from './dto/create-user.dto';
-@Controller('user')
+import {DefaultService } from '../default/default.service';
+
 class LoginRequesttDto{
   @ApiProperty()
   email: string;
@@ -15,8 +16,12 @@ class LoginRequesttDto{
   @ApiProperty()
   password: string;
 }
+@Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly defaultService: DefaultService // 注入 DefaultService
+  ) {}
   @Post('login')
   @ApiOkResponse({
     description: 'Login successful',
@@ -69,10 +74,8 @@ export class UserController {
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
     const user = await this.userService.create(createUserDto);
 
-    // 创建默认餐厅、餐点分类和餐点数据
-    // 假设有相应的服务和方法来处理这些
-    // 例如: this.restaurantService.createDefaultRestaurant(user.id);
+  await this.defaultService.initializeDefaultDataForUser(user.id);
 
-    return { success: true, userId: user.id };
+  return { success: true, userId: user.id };
   }
 }

@@ -8,6 +8,7 @@ import { MealModule } from './meal/meal.module';
 import { CategoryModule } from './category/category.module';
 import { HashtagModule } from './hashtag/hashtag.module';
 import { OrderModule } from './order/order.module';
+import { DefaultModule } from './default/default.module';
 
 
 @Module({
@@ -24,6 +25,7 @@ import { OrderModule } from './order/order.module';
     CategoryModule,
     HashtagModule,
     OrderModule,
+    DefaultModule,
 
   ],
   controllers: [AppController],

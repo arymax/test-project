@@ -31,4 +31,5 @@ export class RestaurantController {
   remove(@Param('id') id: string) {
     return this.restaurantService.remove(+id);
   }
+
 }
