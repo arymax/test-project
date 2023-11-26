@@ -9,10 +9,12 @@ import { CategoryModule } from './category/category.module';
 import { HashtagModule } from './hashtag/hashtag.module';
 import { OrderModule } from './order/order.module';
 import { DefaultModule } from './default/default.module';
-
-
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sql',

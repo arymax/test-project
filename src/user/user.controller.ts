@@ -31,7 +31,7 @@ export class UserController {
   async login(@Body() body: LoginRequesttDto) {
     const user = await this.userService.findOneByEmail(body.email);
     if (!user) {
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException('Invalid t credentials');
     }
 
     if (!bcrypt.compareSync(body.password, user.password)) {
@@ -74,7 +74,7 @@ export class UserController {
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
     const user = await this.userService.create(createUserDto);
 
-  await this.defaultService.initializeDefaultDataForUser(user.id);
+  await this.defaultService.createDefaultRestaurantForUser(user.id);
 
   return { success: true, userId: user.id };
   }
