@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
 import { Hashtag } from '../../hashtag/entities/hashtag.entity';
 import { MealSelection } from './meal-selection';
@@ -19,12 +27,12 @@ export class Meal {
   @Column()
   describe: string;
 
-  @ManyToOne(() => Category, category => category.meals)
+  @ManyToOne(() => Category, (category) => category.meals)
   category: Category;
 
   @ManyToMany(() => Hashtag)
   @JoinTable()
   hashtags: Hashtag[];
-  @OneToMany(() => MealSelection, selection => selection.meal)
+  @OneToMany(() => MealSelection, (selection) => selection.meal)
   selections: MealSelection[];
 }

@@ -6,7 +6,7 @@ export class RestaurantBusinessTime {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Restaurant, restaurant => restaurant.businessTimes)
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.businessTimes)
   restaurant: Restaurant;
 
   @Column()

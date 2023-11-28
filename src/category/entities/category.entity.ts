@@ -1,13 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Restaurant } from '../../restaurant/entities/restaurant.entity';
-import { Meal } from '../../meal/entities/meal.entity'
+import { Meal } from '../../meal/entities/meal.entity';
 
 @Entity()
 export class Category {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Restaurant, restaurant => restaurant.categories)
+  @ManyToOne(() => Restaurant, (restaurant) => restaurant.categories)
   restaurant: Restaurant;
 
   @Column()
@@ -16,6 +22,6 @@ export class Category {
   @Column()
   describe: string;
 
-  @OneToMany(() => Meal, meal => meal.category)
+  @OneToMany(() => Meal, (meal) => meal.category)
   meals: Meal[];
 }

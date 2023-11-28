@@ -10,11 +10,16 @@ import { DefaultService } from '../default/default.service';
 import { User } from '../user/entities/user.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RestaurantBusinessTime, Category, Restaurant,User]),
-     forwardRef(() => UserModule)
+    TypeOrmModule.forFeature([
+      RestaurantBusinessTime,
+      Category,
+      Restaurant,
+      User,
+    ]),
+    forwardRef(() => UserModule),
   ],
   controllers: [RestaurantController],
   providers: [RestaurantService, DefaultService],
-  exports: [RestaurantService]
+  exports: [RestaurantService],
 })
 export class RestaurantModule {}

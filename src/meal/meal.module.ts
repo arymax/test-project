@@ -6,7 +6,9 @@ import { MealController } from './meal.controller';
 import { MealSelection } from './entities/meal-selection';
 import { MealSelectionOption } from './entities/meal-selection-option';
 @Module({
-  imports: [TypeOrmModule.forFeature([Hashtag, MealSelection,MealSelectionOption])],
+  imports: [
+    TypeOrmModule.forFeature([Hashtag, MealSelection, MealSelectionOption]),
+  ],
   controllers: [MealController],
   providers: [MealService],
 })

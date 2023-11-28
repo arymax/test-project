@@ -10,10 +10,10 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 @Injectable()
 export class DefaultService {
   constructor(
-  @InjectRepository(Restaurant)
-  private readonly restaurantRepository: Repository<Restaurant>,
-  @InjectRepository(User)
-  private readonly userRepository: Repository<User>,
+    @InjectRepository(Restaurant)
+    private readonly restaurantRepository: Repository<Restaurant>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
   async createDefaultRestaurantForUser(userId: number): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -23,7 +23,7 @@ export class DefaultService {
     const newRestaurant = new Restaurant();
     newRestaurant.name = 'Your Restaurant Name';
     newRestaurant.describe = 'Description of your restaurant';
-    newRestaurant.imageUrl = 'URL to restaurant image';
+    newRestaurant.image = 'URL to restaurant image';
     newRestaurant.address = 'Restaurant address';
     newRestaurant.owner = user; // 确保这里是 User 实体
     await this.restaurantRepository.save(newRestaurant);

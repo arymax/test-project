@@ -1,17 +1,20 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Restaurant } from './entities/restaurant.entity';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
-import { UserService } from '../user/user.service'; // 导入 UserService
-
+import { UserService } from '../user/user.service';
 @Injectable()
-
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    private readonly userService: UserService,
   ) {}
   async getRestaurantDetails(id: number): Promise<any> {
     const restaurant = await this.restaurantRepository.findOne({
@@ -26,12 +29,12 @@ export class RestaurantService {
     return {
       message: 'Successful get restaurant data',
       data: {
-        image: restaurant.imageUrl, // 确保这里是正确的字段名
+        image: restaurant.image, // 确保这里是正确的字段名
         name: restaurant.name,
         describe: restaurant.describe,
         address: restaurant.address,
-        businessTime: restaurant.businessTimes, // 确保这里是正确的字段名
-      }
+        businessTimes: restaurant.businessTimes, // 确保这里是正确的字段名
+      },
     };
   }
   create(createRestaurantDto: CreateRestaurantDto) {
@@ -46,27 +49,28 @@ export class RestaurantService {
     return `This action returns a #${id} restaurant`;
   }
 
-  async updateRestaurant(id: number, updateRestaurantDto: UpdateRestaurantDto, userId: number): Promise<any> {
-    const restaurant = await this.restaurantRepository.findOne({ where: { id } });
+  async updateRestaurant(
+    id: number,
+    updateRestaurantDto: UpdateRestaurantDto,
+  ): Promise<any> {
+    const restaurant = await this.restaurantRepository.findOne({
+      where: { id },
+      relations: ['owner', 'businessTimes'],
+    });
 
     if (!restaurant) {
-        throw new NotFoundException('Restaurant not found');
+      throw new NotFoundException('Restaurant not found');
+    }
+    const { businessTimes, ...updateData } = updateRestaurantDto;
+    await this.restaurantRepository.update(id, updateData);
+
+    if (businessTimes) {
     }
 
-    if (restaurant.owner.id !== userId) {
-        throw new ForbiddenException('You don\'t have access authorization to this restaurant');
-    }
-
-    // 更新逻辑
-    // 注意：这里需要根据您的实际情况来调整，例如处理图片上传等
-    await this.restaurantRepository.update(id, updateRestaurantDto);
-
-    return { message: 'successful update data' };
-}
-
+    return { message: 'Restaurant updated successfully' };
+  }
 
   remove(id: number) {
     return `This action removes a #${id} restaurant`;
   }
 }
-

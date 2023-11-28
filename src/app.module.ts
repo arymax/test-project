@@ -28,7 +28,6 @@ import { ConfigModule } from '@nestjs/config';
     HashtagModule,
     OrderModule,
     DefaultModule,
-
   ],
   controllers: [AppController],
   providers: [AppService],

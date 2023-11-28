@@ -6,7 +6,7 @@ export class MealSelectionOption {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => MealSelection, selection => selection.options)
+  @ManyToOne(() => MealSelection, (selection) => selection.options)
   selection: MealSelection;
 
   @Column()

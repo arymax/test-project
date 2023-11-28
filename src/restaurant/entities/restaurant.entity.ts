@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
 import { User } from '../../user/entities/user.entity';
 import { RestaurantBusinessTime } from './restaurant-business-time';
@@ -15,7 +21,7 @@ export class Restaurant {
   describe: string;
 
   @Column({ name: 'image_url' })
-  imageUrl: string;
+  image: string;
 
   @Column()
   address: string;
@@ -23,8 +29,11 @@ export class Restaurant {
   @ManyToOne(() => User, (user) => user.restaurants)
   owner: User;
 
-  @OneToMany(() => RestaurantBusinessTime, businessTime => businessTime.restaurant)
+  @OneToMany(
+    () => RestaurantBusinessTime,
+    (businessTime) => businessTime.restaurant,
+  )
   businessTimes: RestaurantBusinessTime[];
-  @OneToMany(() => Category, category => category.restaurant)
+  @OneToMany(() => Category, (category) => category.restaurant)
   categories: Category[];
 }
