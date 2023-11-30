@@ -8,13 +8,17 @@ import { Category } from '../category/entities/category.entity';
 import { UserModule } from '../user/user.module';
 import { DefaultService } from '../default/default.service';
 import { User } from '../user/entities/user.entity';
+import { Meal } from '../meal/entities/meal.entity';
+import { MealSelection } from '../meal/entities/meal-selection';
+import { MealSelectionOption } from '../meal/entities/meal-selection-option';
+import { Hashtag } from '../hashtag/entities/hashtag.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       RestaurantBusinessTime,
       Category,
       Restaurant,
-      User,
+      User,Meal,Hashtag,MealSelection,MealSelectionOption
     ]),
     forwardRef(() => UserModule),
   ],

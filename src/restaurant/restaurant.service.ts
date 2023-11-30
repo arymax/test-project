@@ -1,14 +1,12 @@
-import {
-  Injectable,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import {Injectable,NotFoundException}from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Restaurant } from './entities/restaurant.entity';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { UserService } from '../user/user.service';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 @Injectable()
 export class RestaurantService {
   constructor(
@@ -19,21 +17,27 @@ export class RestaurantService {
   async getRestaurantDetails(id: number): Promise<any> {
     const restaurant = await this.restaurantRepository.findOne({
       where: { id },
-      // 如果有关联的实体，可以在这里添加 relations 选项
+      relations: ['businessTimes'],
     });
 
     if (!restaurant) {
       throw new NotFoundException('Restaurant not found');
     }
+    const businessTimesFormatted = restaurant.businessTimes ? restaurant.businessTimes.map((bt) => ({
+      weekday: bt.weekend,
+      business_start_time: bt.startHour,
+      business_end_time: bt.endHour,
+      is_on_business: bt.isOnBusiness,
+    })) : [];
 
     return {
       message: 'Successful get restaurant data',
       data: {
-        image: restaurant.image, // 确保这里是正确的字段名
+        image: restaurant.image,
         name: restaurant.name,
         describe: restaurant.describe,
         address: restaurant.address,
-        businessTimes: restaurant.businessTimes, // 确保这里是正确的字段名
+        business_time: businessTimesFormatted,
       },
     };
   }
@@ -41,13 +45,6 @@ export class RestaurantService {
     return 'This action adds a new restaurant';
   }
 
-  findAll() {
-    return `This action returns all restaurant`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} restaurant`;
-  }
 
   async updateRestaurant(
     id: number,
@@ -61,16 +58,23 @@ export class RestaurantService {
     if (!restaurant) {
       throw new NotFoundException('Restaurant not found');
     }
-    const { businessTimes, ...updateData } = updateRestaurantDto;
+    const { image, ...updateData } = updateRestaurantDto;
     await this.restaurantRepository.update(id, updateData);
 
-    if (businessTimes) {
+    if (image) {
+      const imageName = `restaurant_${id}_${Date.now()}.jpg`;
+      const imagePath = join(__dirname, '../public', imageName);
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      await writeFile(imagePath, buffer);
+
+      restaurant.image = `${process.env.BACKEND_URL}/public/${imageName}`;
+      await this.restaurantRepository.save(restaurant);
     }
 
-    return { message: 'Restaurant updated successfully' };
-  }
+    // 处理 businessTimes（如果需要）
 
-  remove(id: number) {
-    return `This action removes a #${id} restaurant`;
+    return { message: 'Restaurant updated successfully' };
   }
 }
