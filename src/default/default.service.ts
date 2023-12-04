@@ -42,7 +42,7 @@ export class DefaultService {
     newRestaurant.describe = 'Description of your restaurant';
     newRestaurant.image = 'URL to restaurant image';
     newRestaurant.address = 'Restaurant address';
-    newRestaurant.owner = user; // 确保这里是 User 实体
+    newRestaurant.owner = user;
     await this.restaurantRepository.save(newRestaurant);
     const newCategory = await this.createDefaultCategory(newRestaurant);
     await this.createDefaultMeal(newRestaurant, newCategory);
@@ -106,7 +106,6 @@ export class DefaultService {
     if (!selection) {
       throw new Error('meal selection not exist');
     }
-
     const option = new MealSelectionOption();
     option.selection = selection;
     option.name = name;
@@ -114,15 +113,14 @@ export class DefaultService {
     return await this.mealSelectionOptionRepository.save(option);
   }
   createDefaultBusinessTimes(restaurant: Restaurant): RestaurantBusinessTime[] {
-    // 创建一周的默认营业时间
     const businessTimes = [];
     for (let i = 0; i < 7; i++) {
       const businessTime = new RestaurantBusinessTime();
       businessTime.restaurant = restaurant;
       businessTime.weekend = i;
-      businessTime.startHour = 9; // 示例：早上9点开始
-      businessTime.endHour = 17; // 示例：下午5点结束
-      businessTime.isOnBusiness = true; // 示例：营业中
+      businessTime.startHour = 9;
+      businessTime.endHour = 17;
+      businessTime.isOnBusiness = true;
       businessTimes.push(businessTime);
     }
     return businessTimes;

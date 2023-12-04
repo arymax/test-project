@@ -14,7 +14,7 @@ class BusinessTimeDto {
 }
 export class UpdateRestaurantDto {
   @ApiProperty({ required: false })
-  image?: string;
+  image?: any;
 
   @ApiProperty({ required: false })
   name?: string;

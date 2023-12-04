@@ -49,6 +49,7 @@ export class RestaurantService {
   async updateRestaurant(
     id: number,
     updateRestaurantDto: UpdateRestaurantDto,
+    uploadedImage: any,
   ): Promise<any> {
     const restaurant = await this.restaurantRepository.findOne({
       where: { id },
@@ -58,23 +59,25 @@ export class RestaurantService {
     if (!restaurant) {
       throw new NotFoundException('Restaurant not found');
     }
-    const { image, ...updateData } = updateRestaurantDto;
+    const { businessTimes, image, ...updateData } = updateRestaurantDto;
     await this.restaurantRepository.update(id, updateData);
 
-    if (image) {
+    if (uploadedImage) {
       const imageName = `restaurant_${id}_${Date.now()}.jpg`;
       const imagePath = join(__dirname, '../public', imageName);
-      const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-      const buffer = Buffer.from(base64Data, 'base64');
-
-      await writeFile(imagePath, buffer);
+      await writeFile(imagePath,uploadedImage.buffer);
 
       restaurant.image = `${process.env.BACKEND_URL}/public/${imageName}`;
       await this.restaurantRepository.save(restaurant);
     }
 
-    // 处理 businessTimes（如果需要）
 
     return { message: 'Restaurant updated successfully' };
+  }
+  async getRestaurantMeals(id: number): Promise<Category[]> {
+    return this.categoryRepository.find({
+      where: { restaurant: { id: id } },
+      relations: ['meals', 'meals.hashtags', 'meals.selections', 'meals.selections.options'],
+    });
   }
 }
