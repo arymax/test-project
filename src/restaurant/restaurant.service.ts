@@ -7,11 +7,14 @@ import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { UserService } from '../user/user.service';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
+import { Category } from '../category/entities/category.entity';
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
     private readonly userService: UserService,
   ) {}
   async getRestaurantDetails(id: number): Promise<any> {
