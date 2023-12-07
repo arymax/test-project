@@ -9,7 +9,9 @@ export class OrderMeals {
 
   @ManyToOne(() => Order)
   order: Order;
+  @Column('varchar')
+  meal_name: string;
 
-  @ManyToOne(() => Meal)
-  meal: Meal;
+  @Column('float')
+  meal_price: number;
 }
