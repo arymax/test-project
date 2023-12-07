@@ -7,9 +7,12 @@ export class OrderMealsSelection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => OrderMeals)
+  @ManyToOne(() => OrderMeals, orderMeals => orderMeals.orderMealsSelections)
   orderMeals: OrderMeals;
 
-  @ManyToOne(() => MealSelectionOption)
-  mealSelectionOption: MealSelectionOption;
+  @Column('varchar')
+  option_name: string;
+
+  @Column('float') // 如果价格允许小数，请使用 'float'
+  option_price: number;
 }

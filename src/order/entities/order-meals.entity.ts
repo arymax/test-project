@@ -9,7 +9,10 @@ export class OrderMeals {
 
   @ManyToOne(() => Order)
   order: Order;
+  @Column('varchar')
+  meal_name: string;
 
-  @ManyToOne(() => Meal)
-  meal: Meal;
+  // 記錄當下的price
+  @Column('float')
+  meal_price: number;
 }
