@@ -12,6 +12,7 @@ export class OrderMeals {
   @Column('varchar')
   meal_name: string;
 
+  // 記錄當下的price
   @Column('float')
   meal_price: number;
 }
