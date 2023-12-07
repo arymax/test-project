@@ -1,4 +1,4 @@
-import {Injectable,NotFoundException}from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Restaurant } from './entities/restaurant.entity';
@@ -26,12 +26,14 @@ export class RestaurantService {
     if (!restaurant) {
       throw new NotFoundException('Restaurant not found');
     }
-    const businessTimesFormatted = restaurant.businessTimes ? restaurant.businessTimes.map((bt) => ({
-      weekday: bt.weekend,
-      business_start_time: bt.startHour,
-      business_end_time: bt.endHour,
-      is_on_business: bt.isOnBusiness,
-    })) : [];
+    const businessTimesFormatted = restaurant.businessTimes
+      ? restaurant.businessTimes.map((bt) => ({
+          weekday: bt.weekend,
+          business_start_time: bt.startHour,
+          business_end_time: bt.endHour,
+          is_on_business: bt.isOnBusiness,
+        }))
+      : [];
 
     return {
       message: 'Successful get restaurant data',
@@ -47,7 +49,6 @@ export class RestaurantService {
   create(createRestaurantDto: CreateRestaurantDto) {
     return 'This action adds a new restaurant';
   }
-
 
   async updateRestaurant(
     id: number,
@@ -68,19 +69,23 @@ export class RestaurantService {
     if (uploadedImage) {
       const imageName = `restaurant_${id}_${Date.now()}.jpg`;
       const imagePath = join(__dirname, '../public', imageName);
-      await writeFile(imagePath,uploadedImage.buffer);
+      await writeFile(imagePath, uploadedImage.buffer);
 
       restaurant.image = `${process.env.BACKEND_URL}/public/${imageName}`;
       await this.restaurantRepository.save(restaurant);
     }
-
 
     return { message: 'Restaurant updated successfully' };
   }
   async getRestaurantMeals(id: number): Promise<Category[]> {
     return this.categoryRepository.find({
       where: { restaurant: { id: id } },
-      relations: ['meals', 'meals.hashtags', 'meals.selections', 'meals.selections.options'],
+      relations: [
+        'meals',
+        'meals.hashtags',
+        'meals.selections',
+        'meals.selections.options',
+      ],
     });
   }
 }

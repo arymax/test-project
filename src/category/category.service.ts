@@ -1,5 +1,5 @@
-import {Injectable,NotFoundException}from '@nestjs/common';
-import { CreateDefaultCategoryDto  } from './dto/create-category.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateDefaultCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from '../category/entities/category.entity';
@@ -15,7 +15,10 @@ export class CategoryService {
     private readonly restaurantRepository: Repository<Restaurant>,
   ) {}
 
-  async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<void> {
+  async updateCategory(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<void> {
     if (Object.keys(updateCategoryDto).length === 0) {
       throw new Error('No data provided for update');
     }
@@ -28,13 +31,14 @@ export class CategoryService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-
     if (restaurant_id && category.restaurant.id !== restaurant_id) {
       const restaurant = await this.restaurantRepository.findOne({
         where: { id: restaurant_id },
       });
       if (!restaurant) {
-        throw new NotFoundException(`Restaurant with ID ${restaurant_id} not found`);
+        throw new NotFoundException(
+          `Restaurant with ID ${restaurant_id} not found`,
+        );
       }
       category.restaurant = restaurant;
     }

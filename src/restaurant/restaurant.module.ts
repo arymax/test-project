@@ -18,7 +18,11 @@ import { Hashtag } from '../hashtag/entities/hashtag.entity';
       RestaurantBusinessTime,
       Category,
       Restaurant,
-      User,Meal,Hashtag,MealSelection,MealSelectionOption
+      User,
+      Meal,
+      Hashtag,
+      MealSelection,
+      MealSelectionOption,
     ]),
     forwardRef(() => UserModule),
   ],

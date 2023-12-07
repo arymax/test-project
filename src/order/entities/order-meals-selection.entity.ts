@@ -7,7 +7,7 @@ export class OrderMealsSelection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => OrderMeals, orderMeals => orderMeals.orderMealsSelections)
+  @ManyToOne(() => OrderMeals, (orderMeals) => orderMeals.orderMealsSelections)
   orderMeals: OrderMeals;
 
   @Column('varchar')

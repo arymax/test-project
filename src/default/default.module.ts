@@ -16,7 +16,16 @@ import { CategoryService } from '../category/category.service';
 import { UserModule } from '../user/user.module';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Restaurant, Category, Meal, Hashtag, MealSelection, MealSelectionOption,RestaurantBusinessTime]),
+    TypeOrmModule.forFeature([
+      User,
+      Restaurant,
+      Category,
+      Meal,
+      Hashtag,
+      MealSelection,
+      MealSelectionOption,
+      RestaurantBusinessTime,
+    ]),
     forwardRef(() => UserModule),
   ],
   controllers: [DefaultController],

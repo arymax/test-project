@@ -45,7 +45,11 @@ export class RestaurantController {
     @UploadedFile() image,
     @Body() updateRestaurantDto: UpdateRestaurantDto,
   ): Promise<any> {
-    return this.restaurantService.updateRestaurant(id, updateRestaurantDto, image);
+    return this.restaurantService.updateRestaurant(
+      id,
+      updateRestaurantDto,
+      image,
+    );
   }
   @Get('getRestaurantDetails/:id')
   async getRestaurantDetails(@Param('id') id: number): Promise<any> {
