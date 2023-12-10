@@ -13,7 +13,7 @@ export class OrderMeals {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Order)
+  @ManyToOne(() => Order, (order) => order.orderMeals)
   order: Order;
   @Column('varchar')
   meal_name: string;
