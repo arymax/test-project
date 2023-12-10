@@ -9,7 +9,8 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { GetOrdersResponseDto } from './dto/get-order.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiParam, ApiResponse } from '@nestjs/swagger';
+import { OrderStatusDto } from '../order/dto/order-status.dto';
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -40,5 +41,14 @@ export class OrderController {
       message: "Sucessfully get restaurant's meals",
       data: data,
     };
+  }
+  @Patch('notify-customer-get-order/:orderId')
+  @ApiParam({ name: 'orderId', type: 'number', required: true })
+  @ApiResponse({ status: 200, type: OrderStatusDto })
+  async changeOrderStatusToReady(
+    @Param('orderId') orderId: number,
+  ): Promise<OrderStatusDto> {
+    await this.orderService.changeOrderStatusToReady(orderId);
+    return { message: 'Order status updated to ready for collection.' };
   }
 }
