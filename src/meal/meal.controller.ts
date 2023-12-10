@@ -1,42 +1,39 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
+  Controller,
   Param,
-  Delete,
+  Patch,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { MealService } from './meal.service';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
-
-@Controller('meal')
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
+@Controller('update-meal')
 export class MealController {
   constructor(private readonly mealService: MealService) {}
+  @Patch('/:id')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiBody({ type: UpdateMealDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully updated the meal data.',
+  })
+  async updateMeal(
+    @Param('id') id: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateMealDto: UpdateMealDto,
+  ): Promise<any> {
+    if (file) {
+    }
 
-  @Post()
-  create(@Body() createMealDto: CreateMealDto) {
-    return this.mealService.create(createMealDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.mealService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.mealService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMealDto: UpdateMealDto) {
-    return this.mealService.update(+id, updateMealDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.mealService.remove(+id);
+    const updatedMeal = await this.mealService.updateMeal(id, updateMealDto);
+    return {
+      message: 'Successfully updated the meal data.',
+      data: updatedMeal,
+    };
   }
 }

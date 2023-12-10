@@ -1,7 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 import { Order } from './order.entity';
 import { Meal } from '../../meal/entities/meal.entity';
-
+import { OrderMealsSelection } from './order-meals-selection.entity';
 @Entity()
 export class OrderMeals {
   @PrimaryGeneratedColumn()
@@ -15,4 +21,10 @@ export class OrderMeals {
   // 記錄當下的price
   @Column('float')
   meal_price: number;
+
+  @OneToMany(
+    () => OrderMealsSelection,
+    (orderMealsSelection) => orderMealsSelection.orderMeals,
+  )
+  orderMealsSelections: OrderMealsSelection[];
 }

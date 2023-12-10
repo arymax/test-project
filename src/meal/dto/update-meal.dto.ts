@@ -1,4 +1,48 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateMealDto } from './create-meal.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateMealDto extends PartialType(CreateMealDto) {}
+class TagDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name: string;
+}
+
+class OptionDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name: string;
+}
+
+class SelectionDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty({ type: [OptionDto] })
+  options: OptionDto[];
+}
+
+export class UpdateMealDto {
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  image?: any; // 用于接收文件或URL
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  describe: string;
+
+  @ApiProperty()
+  price: string;
+
+  @ApiProperty({ type: [TagDto] })
+  tags: TagDto[];
+
+  @ApiProperty({ type: [SelectionDto] })
+  selections: SelectionDto[];
+}
