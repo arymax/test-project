@@ -1,26 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
-
+import { Meal } from '../meal/entities/meal.entity';
 @Injectable()
 export class MealService {
-  create(createMealDto: CreateMealDto) {
-    return 'This action adds a new meal';
-  }
+  constructor(
+    @InjectRepository(Meal)
+    private readonly mealRepository: Repository<Meal>,
+  ) {}
 
-  findAll() {
-    return `This action returns all meal`;
-  }
+  async updateMeal(id: number, updateMealDto: UpdateMealDto): Promise<Meal> {
+    const meal = await this.mealRepository.findOne({
+      where: { id },
+      relations: ['hashtags', 'selections'],
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} meal`;
-  }
+    if (!meal) {
+      throw new NotFoundException(`Meal with ID ${id} not found`);
+    }
 
-  update(id: number, updateMealDto: UpdateMealDto) {
-    return `This action updates a #${id} meal`;
-  }
+    if (typeof updateMealDto.image === 'string') {
+      meal.imageUrl = updateMealDto.image;
+    } else {
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} meal`;
+    meal.name = updateMealDto.name;
+    meal.describe = updateMealDto.describe;
+    meal.price = parseFloat(updateMealDto.price);
+
+    await this.mealRepository.save(meal);
+    return meal;
   }
 }
