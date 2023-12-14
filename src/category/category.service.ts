@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateDefaultCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from '../category/entities/category.entity';
 import { Restaurant } from '../restaurant/entities/restaurant.entity';
 import { Repository } from 'typeorm';
+import { MealService } from 'src/meal/meal.service';
 
 @Injectable()
 export class CategoryService {
@@ -13,6 +13,7 @@ export class CategoryService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+    private readonly mealService: MealService,
   ) {}
 
   async updateCategory(
@@ -48,5 +49,23 @@ export class CategoryService {
 
     // 保存更新后的Category
     await this.categoryRepository.save(category);
+  }
+
+  async removeCategory(id: number): Promise<void> {
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      relations: ['meals'],
+    });
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    await Promise.all(
+      category.meals.map(async (meal) => {
+        await this.mealService.removeMeal(meal.id);
+      }),
+    );
+
+    await this.categoryRepository.remove(category);
   }
 }

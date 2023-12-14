@@ -7,6 +7,7 @@ import { Meal } from '../meal/entities/meal.entity';
 import { MealSelection } from '../meal/entities/meal-selection';
 import { Hashtag } from '../hashtag/entities/hashtag.entity';
 import { Category } from '../category/entities/category.entity';
+import { MealSelectionOption } from './entities/meal-selection-option';
 @Injectable()
 export class MealService {
   constructor(
@@ -18,6 +19,8 @@ export class MealService {
     private readonly hashtagRepository: Repository<Hashtag>,
     @InjectRepository(MealSelection)
     private readonly selectionRepository: Repository<MealSelection>,
+    @InjectRepository(MealSelectionOption)
+    private readonly mealSelectionOptionRepository: Repository<MealSelectionOption>,
   ) {}
   async createDefaultMeal(createMealDto: CreateMealDto): Promise<Meal> {
     const meal = new Meal();
@@ -91,5 +94,30 @@ export class MealService {
 
     await this.mealRepository.save(meal);
     return meal;
+  }
+
+  async removeMeal(id: number): Promise<void> {
+    const meal = await this.mealRepository.findOne({
+      where: { id },
+      relations: ['selections', 'selections.options'],
+    });
+    if (!meal) {
+      throw new NotFoundException(`Meal with ID ${id} not found`);
+    }
+
+    await Promise.all(
+      meal.selections.map(async (mealSelection) => {
+        await Promise.all(
+          mealSelection.options.map(async (mealSelectionOption) => {
+            await this.mealSelectionOptionRepository.remove(
+              mealSelectionOption,
+            );
+          }),
+        );
+        await this.selectionRepository.remove(mealSelection);
+      }),
+    );
+
+    await this.mealRepository.remove(meal);
   }
 }
