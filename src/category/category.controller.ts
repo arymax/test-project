@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateDefaultCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -61,5 +52,14 @@ export class CategoryController {
   ): Promise<any> {
     await this.categoryService.updateCategory(id, updateCategoryDto);
     return { message: 'Successfully update category information' };
+  }
+
+  @Delete(':category_id')
+  @ApiBearerAuth()
+  async remove(@Param('category_id') category_id: number): Promise<any> {
+    // TODO: Check is user has auth to delete this category
+
+    await this.categoryService.removeCategory(category_id);
+    return { message: 'Successfully removed category and following meal' };
   }
 }

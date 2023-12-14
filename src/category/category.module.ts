@@ -11,6 +11,7 @@ import { RestaurantBusinessTime } from '../restaurant/entities/restaurant-busine
 import { Meal } from '../meal/entities/meal.entity';
 import { Category } from '../category/entities/category.entity';
 import { DefaultService } from '../default/default.service';
+import { MealService } from 'src/meal/meal.service';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { DefaultService } from '../default/default.service';
     ]),
   ],
   controllers: [CategoryController],
-  providers: [CategoryService, DefaultService],
+  providers: [CategoryService, DefaultService, MealService],
 })
 export class CategoryModule {}
