@@ -28,7 +28,6 @@ export class UserService {
     user.name = createUserDto.name;
     user.email = createUserDto.email;
     user.password = createUserDto.password;
-    // 其他必要的设置
     return this.userRepository.save(user);
   }
   update(id: number, updateUserDto: UpdateUserDto) {
