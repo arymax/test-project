@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { OrderMeals } from './order-meals.entity';
-import { MealSelectionOption } from '../../meal/entities/meal-selection-option';
 
 @Entity()
 export class OrderMealsSelection {
@@ -9,6 +8,9 @@ export class OrderMealsSelection {
 
   @ManyToOne(() => OrderMeals, (orderMeals) => orderMeals.orderMealsSelections)
   orderMeals: OrderMeals;
+
+  @Column('varchar')
+  selection_name: string;
 
   @Column('varchar')
   option_name: string;

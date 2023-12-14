@@ -6,7 +6,6 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Order } from './order.entity';
-import { Meal } from '../../meal/entities/meal.entity';
 import { OrderMealsSelection } from './order-meals-selection.entity';
 @Entity()
 export class OrderMeals {
@@ -21,6 +20,9 @@ export class OrderMeals {
   // 記錄當下的price
   @Column('float')
   meal_price: number;
+
+  @Column('int')
+  count: number;
 
   @OneToMany(
     () => OrderMealsSelection,
