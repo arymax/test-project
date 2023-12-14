@@ -1,16 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { GetOrdersResponseDto } from './dto/get-order.dto';
-import { ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { OrderStatusDto } from '../order/dto/order-status.dto';
+import { CrateOrderResponse, CreateOrderDto } from './dto/create-order.dto';
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -50,5 +43,20 @@ export class OrderController {
   ): Promise<OrderStatusDto> {
     await this.orderService.changeOrderStatusToReady(orderId);
     return { message: 'Order status updated to ready for collection.' };
+  }
+
+  // TODO: untested, need to fix create default restuarant first.
+  @Post('create-order')
+  @ApiBearerAuth()
+  @ApiBody({ type: CreateOrderDto })
+  @ApiResponse({ status: 201, type: OrderStatusDto })
+  async createOrder(@Body() body: CreateOrderDto): Promise<CrateOrderResponse> {
+    const order = await this.orderService.createOrder(body);
+    return {
+      message: 'Order created successfully.',
+      data: {
+        order_id: order.id,
+      },
+    };
   }
 }

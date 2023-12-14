@@ -92,4 +92,17 @@ export class MealService {
     await this.mealRepository.save(meal);
     return meal;
   }
+
+  async findOne(id: number): Promise<Meal> {
+    const meal = await this.mealRepository.findOne({
+      where: { id },
+      relations: ['hashtags', 'selections', 'selections.options'],
+    });
+
+    if (!meal) {
+      throw new NotFoundException(`Meal with ID ${id} not found`);
+    }
+
+    return meal;
+  }
 }
