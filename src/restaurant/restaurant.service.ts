@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Restaurant } from './entities/restaurant.entity';
-import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { UserService } from '../user/user.service';
 import { writeFile } from 'fs/promises';
@@ -46,9 +45,6 @@ export class RestaurantService {
       },
     };
   }
-  create(createRestaurantDto: CreateRestaurantDto) {
-    return 'This action adds a new restaurant';
-  }
 
   async updateRestaurant(
     id: number,
@@ -87,5 +83,15 @@ export class RestaurantService {
         'meals.selections.options',
       ],
     });
+  }
+
+  async findAllWithCategoryAndMeals(): Promise<Restaurant[]> {
+    return this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .leftJoinAndSelect('restaurant.categories', 'categories')
+      .leftJoinAndSelect('categories.meals', 'meals')
+      .where('categories.id IS NOT NULL')
+      .andWhere('meals.id IS NOT NULL')
+      .getMany();
   }
 }

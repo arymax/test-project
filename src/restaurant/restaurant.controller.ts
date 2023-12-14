@@ -1,19 +1,14 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
-  Patch,
   Param,
-  Delete,
   Put,
-  Request,
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
 
 import { RestaurantService } from './restaurant.service';
-import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiBody, ApiParam } from '@nestjs/swagger';
@@ -61,6 +56,34 @@ export class RestaurantController {
     return {
       message: "Successfully get restaurant's meals",
       data: { categories },
+    };
+  }
+
+  @Get('get-all')
+  async findAll() {
+    const restaurants =
+      await this.restaurantService.findAllWithCategoryAndMeals();
+
+    // average_cost = all meal in restaurant / number of meal in restaurant
+    const organizedRestaurants = restaurants.map((restaurant) => ({
+      id: restaurant.id,
+      name: restaurant.name,
+      describe: restaurant.describe,
+      address: restaurant.address,
+      image: restaurant.image,
+      average_cost:
+        restaurant.categories.reduce(
+          (acc, cur) =>
+            acc +
+            cur.meals.reduce((acc, cur) => acc + cur.price, 0) /
+              cur.meals.length,
+          0,
+        ) / restaurant.categories.length,
+    }));
+
+    return {
+      message: 'Successful get all restaurants data',
+      data: organizedRestaurants,
     };
   }
 }
