@@ -20,5 +20,6 @@ import { MealSelectionOption } from './entities/meal-selection-option';
   ],
   controllers: [MealController],
   providers: [MealService],
+  exports: [MealService],
 })
 export class MealModule {}

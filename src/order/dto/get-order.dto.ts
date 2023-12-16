@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-class OrderMealsSelectionDto {
+export class OrderMealsSelectionDto {
   @ApiProperty()
   option_name: string;
 
@@ -8,7 +8,7 @@ class OrderMealsSelectionDto {
   option_price: number;
 }
 
-class OrderMealsDto {
+export class OrderMealsDto {
   @ApiProperty()
   meal_name: string;
 
@@ -19,7 +19,7 @@ class OrderMealsDto {
   selections: OrderMealsSelectionDto[];
 }
 
-class OrderResponseDto {
+export class OrderResponseDto {
   @ApiProperty()
   id: string;
 
