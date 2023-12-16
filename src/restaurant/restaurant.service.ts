@@ -17,7 +17,7 @@ export class RestaurantService {
     private readonly categoryRepository: Repository<Category>,
     private readonly userService: UserService,
   ) {}
-  async getRestaurantDetails(id: number): Promise<any> {
+  async getRestaurantDetails(id: number) {
     const restaurant = await this.restaurantRepository.findOne({
       where: { id },
       relations: ['businessTimes'],
@@ -85,6 +85,16 @@ export class RestaurantService {
         'meals.hashtags',
         'meals.selections',
         'meals.selections.options',
+      ],
+    });
+  }
+
+  async findAllRestaurantWithMeals(): Promise<Restaurant[]> {
+    return this.restaurantRepository.find({
+      relations: [
+        'categories',
+        'categories.meals',
+        'categories.meals.hashtags',
       ],
     });
   }

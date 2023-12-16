@@ -1,22 +1,19 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
-  Patch,
   Param,
-  Delete,
   Put,
-  Request,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 
 import { RestaurantService } from './restaurant.service';
-import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiBody, ApiParam } from '@nestjs/swagger';
+import getRecommendRestaurants from './../util/getRecommandation';
 @Controller('restaurant')
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
@@ -61,6 +58,65 @@ export class RestaurantController {
     return {
       message: "Successfully get restaurant's meals",
       data: { categories },
+    };
+  }
+
+  @Get('getRecommendRestaurant')
+  async getRecommendRestaurant(
+    @Query('lat') lat: number,
+    @Query('lot') lot: number,
+    @Query('tags') tags: string[],
+  ): Promise<any> {
+    const restaurants =
+      await this.restaurantService.findAllRestaurantWithMeals();
+
+    type OrganizedRestaurants = Parameters<typeof getRecommendRestaurants>[2];
+
+    function getMockAddressLocation(address: string) {
+      return {
+        latitude: 25.033,
+        longitude: 121.565,
+      };
+    }
+
+    const organizedRestaurants: OrganizedRestaurants = restaurants.map(
+      (restaurant) => {
+        const { id, address, categories } = restaurant;
+        return {
+          restaurant_id: id,
+          location: getMockAddressLocation(address),
+          menu: categories.reduce(
+            (acc, cur) => [
+              ...acc,
+              ...cur.meals.map((meal) => ({
+                dish_name: meal.name,
+                tags: meal.hashtags.map((hashtag) => hashtag.name),
+              })),
+            ],
+            [],
+          ),
+        };
+      },
+    );
+
+    const recommandRestaurants = getRecommendRestaurants(
+      { latitude: lat, longitude: lot },
+      tags,
+      organizedRestaurants,
+    );
+
+    const recommandRestaurantWithDetails = await Promise.all(
+      recommandRestaurants.map(async (recommandRestaurant) => {
+        const restaurant = await this.restaurantService.getRestaurantDetails(
+          recommandRestaurant.restaurant_id,
+        );
+        return restaurant.data;
+      }),
+    );
+
+    return {
+      message: 'Successfully get recommand restaurants',
+      data: recommandRestaurantWithDetails,
     };
   }
 }
