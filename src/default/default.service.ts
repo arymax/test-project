@@ -33,43 +33,109 @@ export class DefaultService {
     private readonly restaurantBusinessTimeRepository: Repository<RestaurantBusinessTime>,
   ) {}
   async createDefaultRestaurantForUser(userId: number): Promise<void> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    console.log('Starting createDefaultRestaurantForUser');
+    // 验证用户存在
+    const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) {
       throw new Error('用户不存在');
     }
+
+    // 创建新的餐厅实体
     const newRestaurant = new Restaurant();
     newRestaurant.name = 'Your Restaurant Name';
     newRestaurant.describe = 'Description of your restaurant';
     newRestaurant.image = 'URL to restaurant image';
     newRestaurant.address = 'Restaurant address';
     newRestaurant.owner = user;
-    await this.restaurantRepository.save(newRestaurant);
-    const newCategory = await this.createDefaultCategory(newRestaurant);
-    await this.createDefaultMeal(newRestaurant, newCategory);
-    const defaultBusinessTimes = this.createDefaultBusinessTimes(newRestaurant);
-    await this.restaurantBusinessTimeRepository.save(defaultBusinessTimes);
+
+    // 保存餐厅实体并获取生成的 ID
+    console.log('Saving new restaurant', newRestaurant);
+    const savedRestaurant = await this.restaurantRepository.save(newRestaurant);
+    console.log('Restaurant saved', savedRestaurant);
+
+    // 使用保存后获得的餐厅 ID 创建默认分类
+    console.log('Creating default category for the restaurant');
+    await this.createDefaultCategory(savedRestaurant.id); // 注意这里传递的是 savedRestaurant 的 id
   }
-  async createDefaultCategory(restaurant: Restaurant): Promise<Category> {
+  async createDefaultCategory(restaurantId: number): Promise<Category> {
+    console.log('Starting createDefaultCategory');
+
+    // 从数据库中获取 restaurant 的实例
+    const restaurant = await this.restaurantRepository.findOneBy({
+      id: restaurantId,
+    });
+
+    // 检查 restaurant 是否存在
+    if (!restaurant) {
+      throw new Error(`Restaurant with ID ${restaurantId} not found`);
+    }
     const newCategory = new Category();
     newCategory.name = 'Default Category';
     newCategory.describe = 'Default category description';
     newCategory.restaurant = restaurant;
-    return await this.categoryRepository.save(newCategory);
+
+    console.log('Saving new category', newCategory);
+    const savedCategory = await this.categoryRepository.save(newCategory);
+    console.log('Category saved', savedCategory);
+
+    // 调用 createDefaultMeal 函数，创建并保存新的 Meal 实例
+    console.log('Creating default meal for the category');
+    await this.createDefaultMeal(restaurantId, savedCategory.id); // 确保传递正确的参数
+    const updatedCategory = await this.categoryRepository.findOne({
+      where: { id: savedCategory.id },
+      relations: ['meals'],
+    });
+    if (!updatedCategory) {
+      throw new Error(
+        `Category with ID ${savedCategory.id} not found after update`,
+      );
+    }
+    // 创建默认的营业时间
+    console.log('Creating default business times');
+    const defaultBusinessTimes = this.createDefaultBusinessTimes(restaurant);
+    await this.restaurantBusinessTimeRepository.save(defaultBusinessTimes);
+
+    return updatedCategory; // 返回已保存的 Category 实例
   }
   async createDefaultMeal(
-    restaurant: Restaurant,
-    category: Category,
+    restaurantId: number,
+    categoryId: number,
   ): Promise<void> {
-    const newMeal = new Meal();
-    newMeal.name = 'Default Meal';
-    newMeal.describe = 'Default meal description';
-    newMeal.price = 10; // 示例价格
-    newMeal.imageUrl = 'URL to meal image';
-    newMeal.category = category;
-    const savedMeal = await this.mealRepository.save(newMeal);
+    console.log('Starting createDefaultMeal');
+    try {
+      // 从数据库中获取 restaurant 和 category 的实例
+      const restaurant = await this.restaurantRepository.findOneBy({
+        id: restaurantId,
+      });
+      const category = await this.categoryRepository.findOneBy({
+        id: categoryId,
+      });
 
-    // 创建与餐点相关的标签
-    await this.createDefaultHashtags(savedMeal);
+      // 检查 restaurant 和 category 是否存在
+      if (!restaurant || !category) {
+        throw new Error('Restaurant or Category not found');
+      }
+
+      const newMeal = new Meal();
+      newMeal.name = 'Default Meal';
+      newMeal.describe = 'Default meal description';
+      newMeal.price = 10;
+      newMeal.imageUrl = 'URL to meal image';
+      newMeal.category = category; // 使用从数据库检索的 category 实例
+
+      // 保存 Meal 实体
+      console.log('Saving new meal', newMeal);
+      const savedMeal = await this.mealRepository.save(newMeal);
+      console.log('Meal saved', savedMeal);
+
+      // 创建与餐点相关的标签
+      console.log('Creating hashtags for meal');
+      await this.createDefaultHashtags(savedMeal);
+      console.log('Hashtags created for meal');
+    } catch (error) {
+      console.error('Error in createDefaultMeal', error);
+      throw error; // 重新抛出异常
+    }
   }
   async createDefaultHashtags(meal: Meal): Promise<void> {
     const newHashtag = new Hashtag();
