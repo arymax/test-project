@@ -7,19 +7,25 @@ import {
   Param,
   UseGuards,
   Request,
+  NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryService } from './category.service';
 import { CreateDefaultCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { DefaultService } from '../default/default.service';
+import { Restaurant } from '../restaurant/entities/restaurant.entity';
+import { Repository } from 'typeorm';
 @Controller('category')
 export class CategoryController {
   constructor(
+    @InjectRepository(Restaurant)
+    private readonly restaurantRepository: Repository<Restaurant>,
     private readonly categoryService: CategoryService,
     private readonly defaultService: DefaultService,
   ) {}
-  @Post('/default')
+  @Post('/Create-DefaultCategoryandMeal')
   @ApiBody({ type: CreateDefaultCategoryDto })
   @ApiResponse({
     status: 201,
@@ -30,22 +36,71 @@ export class CategoryController {
     @Body() createDefaultCategoryDto: CreateDefaultCategoryDto,
   ) {
     try {
-      await this.defaultService.createDefaultRestaurantForUser(
+      // 验证传入的 restaurant_id 对应的餐厅是否存在
+      const restaurant = await this.restaurantRepository.findOneBy({
+        id: createDefaultCategoryDto.restaurant_id,
+      });
+      if (!restaurant) {
+        throw new NotFoundException(
+          `Restaurant with ID ${createDefaultCategoryDto.restaurant_id} not found`,
+        );
+      }
+
+      // 创建默认分类和餐点，这里假设 createDefaultCategory 方法已经被更新
+      // 并且它返回了创建的 Category 实体
+      const newCategory = await this.defaultService.createDefaultCategory(
         createDefaultCategoryDto.restaurant_id,
       );
+      if (!newCategory.meals || newCategory.meals.length === 0) {
+        throw new Error('No meals found in the created category.');
+      }
+
+      console.log('Meals found in the category', newCategory.meals);
+
       return {
         message: 'Successfully created default category and meal',
         data: {
-          id: 1,
-          name: 'Default category name',
-          describe: 'Default category describe',
-          meals: {
-            id: '1',
-            image: 'http://localhost:3000/public/default.jpg',
-            name: 'mealOneName',
-            describe: 'mealOneDescribe',
-            price: 10,
-          },
+          id: newCategory.id,
+          name: newCategory.name,
+          describe: newCategory.describe,
+          meals: newCategory.meals.map((meal) => {
+            console.log('Processing meal:', meal);
+
+            // 检查 hashtags 和 selections 是否存在
+            if (!meal.hashtags) {
+              console.error('No hashtags found for meal', meal);
+            }
+            if (!meal.selections) {
+              console.error('No selections found for meal', meal);
+            }
+
+            return {
+              id: meal.id,
+              image: meal.imageUrl,
+              name: meal.name,
+              describe: meal.describe,
+              price: meal.price,
+              tags: meal.hashtags
+                ? meal.hashtags.map((tag) => ({
+                    id: tag.id,
+                    name: tag.name,
+                  }))
+                : [],
+              selections: meal.selections
+                ? meal.selections.map((selection) => ({
+                    id: selection.id,
+                    name: selection.name,
+                    options: selection.options
+                      ? selection.options.map((option) => ({
+                          id: option.id,
+                          name: option.name,
+                          price: option.price,
+                        }))
+                      : [],
+                  }))
+                : [],
+            };
+          }),
         },
       };
     } catch (error) {
